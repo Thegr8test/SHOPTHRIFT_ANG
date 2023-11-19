@@ -1,20 +1,35 @@
 import { Router } from 'express';
 import { sample_users } from '../data';
 import jwt from "jsonwebtoken";
+import asyncHandler from 'express-async-handler';
+import {UserModel} from '../models/user.model';
 
 const router = Router();
 
-router.post("/login", (req, res) => {
-    const {email, password} = req.body;
-    const user = sample_users.find(user => user.email === email &&
-         user.password === password);
+router.get("/seed", asyncHandler (
+    async (req, res) => {
+        const usersCount = await UserModel.countDocuments();
+        if (usersCount > 0) {
+            res.send("seed already exists");
+            return;
+        }
+        await UserModel.create(sample_users);
+        res.send("seed created");
+}))
 
-         if(user){
-            res.send(generateTokenResponse(user));
-         }else{
-            res.status(400).send("User name or password is not valid!");
-         }
-})
+router.post("/login", asyncHandler(
+    async (req, res) => {
+        const {email, password} = req.body;
+        const user = await UserModel.findOne({email, password});
+    
+             if(user){
+                res.send(generateTokenResponse(user));
+             }else{
+                const BAD_REQUEST = 400;
+                res.status(BAD_REQUEST).send("User name or password is not valid!");
+             }
+    }
+))
 
 const generateTokenResponse = (user:any)=>{
     const token = jwt.sign({
