@@ -19,6 +19,10 @@ img{
     object-fit: cover;
     height: 35rem;
     margin: 1rem;
+    border-radius: 50px;
+    background: #e9524d;
+    box-shadow:  -30px 30px 60px #ec7474,
+             30px -30px 60px #ffe4e4;
 
 }
 
